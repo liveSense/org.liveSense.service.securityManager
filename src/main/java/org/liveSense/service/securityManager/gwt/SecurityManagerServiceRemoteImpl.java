@@ -53,6 +53,7 @@ import org.apache.sling.commons.osgi.OsgiUtil;
 import org.liveSense.service.securityManager.SecurityManagerService;
 import org.liveSense.service.securityManager.exceptions.AccessDeniedException;
 import org.liveSense.service.securityManager.exceptions.InternalException;
+import org.osgi.framework.BundleContext;
 
 /**
  * This class implements a servlet-based RPC remote service for handling RPC calls from the GWT client application.
@@ -116,7 +117,9 @@ public class SecurityManagerServiceRemoteImpl extends SlingRemoteServiceServlet 
          * The <code>SlingRemoteServiceServlet</code> has been extended to set a correct classloader and to provide
          * resources via bundles.
          */
-        super.setClassLoader(this.getClass().getClassLoader());
+
+		
+        super.setClassLoader(context.getBundleContext().getBundle().getClass().getClassLoader());
         super.setBundle(context.getBundleContext().getBundle());
 
 		// Setting up allowedUsers
@@ -154,7 +157,7 @@ public class SecurityManagerServiceRemoteImpl extends SlingRemoteServiceServlet 
 
 
     
-		log.info("activate: initialized and provided classloader {} to GWT.", this.getClass().getClassLoader());
+		log.info("activate: initialized and provided classloader {} to GWT.", context.getBundleContext().getBundle().getClass().getClassLoader());
 	}
 
 
