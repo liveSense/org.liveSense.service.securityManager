@@ -23,7 +23,10 @@
 	<groupId>org.liveSense</groupId>
 	<artifactId>org.liveSense.service.securityManager</artifactId>
 	<packaging>bundle</packaging>
-	<version>1.0.0</version>
+	<version>1.0.0-SNAPSHOT</version>
+	<properties>
+		<gwt.version>2.0.3</gwt.version>
+	</properties>
 	<name>liveSense Security Manager service</name>
 	<description>
 		liveSense security manager service,
@@ -109,83 +112,76 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>org.apache.sling</groupId>
-			<artifactId>org.apache.sling.api</artifactId>
-			<version>2.0.8</version>
+			<groupId>javax.jcr</groupId>
+			<artifactId>jcr</artifactId>
+			<version>2.0</version>
 			<scope>provided</scope>
+			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jackrabbit</groupId>
 			<artifactId>jackrabbit-api</artifactId>
 			<version>2.0.0</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.jcr</groupId>
-			<artifactId>jcr</artifactId>
-			<version>2.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.sling</groupId>
-			<artifactId>org.apache.sling.jcr.base</artifactId>
-			<version>2.0.7-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.sling</groupId>
-			<artifactId>org.apache.sling.servlets.post</artifactId>
-			<version>2.0.5-SNAPSHOT</version>
-			<optional>false</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.scr</artifactId>
-			<version>1.4.0</version>
-			<optional>false</optional>
+			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.liveSense</groupId>
 			<artifactId>org.liveSense.utils</artifactId>
 			<version>1.0.2</version>
-			<optional>false</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-servlet</artifactId>
-			<version>2.0.1</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>org.liveSense</groupId>
-			<artifactId>org.liveSense.servlet.gwtrpc</artifactId>
-			<version>1.0.0</version>
+			<scope>provided</scope>
 			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.sling</groupId>
 			<artifactId>org.apache.sling.jcr.api</artifactId>
 			<version>2.0.7-SNAPSHOT</version>
+			<scope>provided</scope>
 			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.sling</groupId>
 			<artifactId>org.apache.sling.commons.log</artifactId>
 			<version>2.0.7-SNAPSHOT</version>
+			<scope>provided</scope>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.jcr.base</artifactId>
+			<version>2.0.7-SNAPSHOT</version>
+			<scope>provided</scope>
 			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
+			<artifactId>org.osgi.compendium</artifactId>
 			<version>4.2.0</version>
+			<scope>provided</scope>
 			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.sling</groupId>
 			<artifactId>org.apache.sling.commons.osgi</artifactId>
 			<version>2.0.5-SNAPSHOT</version>
+			<scope>provided</scope>
 			<type>bundle</type>
 		</dependency>
+		<dependency>
+			<groupId>org.liveSense</groupId>
+			<artifactId>com.google.gwt</artifactId>
+			<version>${gwt.version}</version>
+			<scope>provided</scope>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-servlet</artifactId>
+			<version>${gwt.version}</version>
+			<scope>compile</scope>
+			<type>bundle</type>
+		</dependency>
+
 	</dependencies>
 	<profiles>
 		<profile>
@@ -244,6 +240,10 @@
 		</profile>
 	</profiles>
 </project>
+
+
+
+
 
 
 
