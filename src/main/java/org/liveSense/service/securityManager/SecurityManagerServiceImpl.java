@@ -21,7 +21,6 @@ package org.liveSense.service.securityManager;
  * @author Robert Csakany (robson@semmi.se)
  * @created Feb 12, 2010
  */
-import java.util.logging.Level;
 import org.liveSense.service.securityManager.exceptions.PrincipalNotExistsException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -98,7 +97,8 @@ public class SecurityManagerServiceImpl extends AdministrativeService implements
 
 	
 	/** Returns the JCR repository used by this service. */
-	public SlingRepository getRepository() {
+	public SlingRepository getRepository() throws RepositoryException {
+		if (repository == null) throw new RepositoryException("Repository is null");
 		return repository;
 	}
 

@@ -23,8 +23,6 @@
 package org.liveSense.service.securityManager.gwt;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.jcr.LoginException;
@@ -47,13 +45,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
 import javax.jcr.Credentials;
-import org.apache.jackrabbit.api.security.user.Authorizable;
-import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.sling.commons.osgi.OsgiUtil;
 import org.liveSense.service.securityManager.SecurityManagerService;
 import org.liveSense.service.securityManager.exceptions.AccessDeniedException;
 import org.liveSense.service.securityManager.exceptions.InternalException;
-import org.osgi.framework.BundleContext;
 
 /**
  * This class implements a servlet-based RPC remote service for handling RPC calls from the GWT client application.

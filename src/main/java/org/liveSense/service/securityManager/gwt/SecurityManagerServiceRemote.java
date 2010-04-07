@@ -21,9 +21,6 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
-import org.apache.jackrabbit.api.security.user.Authorizable;
-import org.apache.jackrabbit.api.security.user.Group;
-import org.apache.jackrabbit.api.security.user.User;
 import org.liveSense.service.securityManager.AccessRights;
 import org.liveSense.service.securityManager.SerializablePrivilege;
 import org.liveSense.service.securityManager.exceptions.AccessDeniedException;
@@ -35,6 +32,7 @@ import org.liveSense.service.securityManager.exceptions.PrincipalIsNotUserExcept
 import org.liveSense.service.securityManager.exceptions.PrincipalNotExistsException;
 import org.liveSense.service.securityManager.exceptions.UserAlreadyExistsException;
 import org.liveSense.service.securityManager.exceptions.UserNotExistsException;
+import org.liveSense.servlet.gwtrpc.SlingRemoteServiceServlet;
 import org.liveSense.utils.GenericValue;
 
 /**

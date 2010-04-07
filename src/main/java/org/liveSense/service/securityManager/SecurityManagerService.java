@@ -21,6 +21,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.security.Privilege;
 import org.apache.jackrabbit.api.security.user.Authorizable;
@@ -419,7 +420,7 @@ public interface SecurityManagerService {
 	/**
 	 * Returns the JCR repository used by this service.
 	 */
-	SlingRepository getRepository();
+	SlingRepository getRepository() throws RepositoryException;
 
 	/**
 	 * Return the supported Privileges for the specified node.
