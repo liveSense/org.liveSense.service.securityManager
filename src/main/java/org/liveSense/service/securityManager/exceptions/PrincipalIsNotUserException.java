@@ -16,13 +16,16 @@
  */
 
 package org.liveSense.service.securityManager.exceptions;
+
+import java.io.Serializable;
+
 /**
  *
  * @author Robert Csakany (robson@semmi.se)
  * @created Feb 12, 2010
  */
 
-public class PrincipalIsNotUserException extends Exception {
+public class PrincipalIsNotUserException extends Exception implements Serializable {
 	private String msg;
 
 	public PrincipalIsNotUserException() {

@@ -17,12 +17,14 @@
 
 package org.liveSense.service.securityManager.exceptions;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Robert Csakany (robson@semmi.se)
  * @created Feb 26, 2010
  */
-public class PrincipalNotExistsException extends Exception {
+public class PrincipalNotExistsException extends Exception implements Serializable {
 
 	private String msg;
 
