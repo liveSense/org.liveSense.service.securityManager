@@ -36,7 +36,7 @@ import org.liveSense.service.securityManager.exceptions.PrincipalIsNotUserExcept
 import org.liveSense.service.securityManager.exceptions.PrincipalNotExistsException;
 import org.liveSense.service.securityManager.exceptions.UserAlreadyExistsException;
 import org.liveSense.service.securityManager.exceptions.UserNotExistsException;
-import org.liveSense.utils.GenericValue;
+import org.liveSense.core.wrapper.GenericValue;
 
 /**
  *

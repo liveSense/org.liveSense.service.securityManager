@@ -60,10 +60,10 @@ import org.liveSense.service.securityManager.exceptions.PrincipalIsNotGroupExcep
 import org.liveSense.service.securityManager.exceptions.PrincipalIsNotUserException;
 import org.liveSense.service.securityManager.exceptions.UserAlreadyExistsException;
 import org.liveSense.service.securityManager.exceptions.UserNotExistsException;
-import org.liveSense.utils.AdministrativeService;
-import org.liveSense.utils.Configurator;
-import org.liveSense.utils.GenericValue;
-import org.liveSense.utils.PasswordDigester;
+import org.liveSense.core.AdministrativeService;
+import org.liveSense.core.Configurator;
+import org.liveSense.core.wrapper.GenericValue;
+import org.liveSense.core.PasswordDigester;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
