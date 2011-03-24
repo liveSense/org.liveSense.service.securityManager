@@ -45,6 +45,11 @@ import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.AccessControlPolicy;
 import javax.jcr.security.AccessControlPolicyIterator;
 import javax.jcr.security.Privilege;
+
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.principal.PrincipalManager;
 
 import org.apache.jackrabbit.api.security.user.Authorizable;
@@ -68,13 +73,10 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @scr.component label="%service.name"
- *         description="%service.description"
- *         immediate="true"
- * @scr.service 
- * @
- */
+@Component(label="%service.name",
+	description="%service.description",
+	immediate=true)
+@Service(value=SecurityManagerService.class)
 public class SecurityManagerServiceImpl extends AdministrativeService implements SecurityManagerService {
 
 	/**
@@ -84,15 +86,16 @@ public class SecurityManagerServiceImpl extends AdministrativeService implements
 	/**
 	 * The JCR Repository we access to resolve resources
 	 *
-	 * @scr.reference
 	 */
+
+	@Reference
 	private SlingRepository repository;
 
 	/**
 	 * Reference to configurator
 	 * 
-	 * @scr.reference
 	 */
+	@Reference
 	Configurator configurator;
 
 	
@@ -102,13 +105,13 @@ public class SecurityManagerServiceImpl extends AdministrativeService implements
 		return repository;
 	}
 
-	// ---------- SCR integration ---------------------------------------------
 	/**
 	 * Activates this component.
 	 *
 	 * @param componentContext The OSGi <code>ComponentContext</code> of this
 	 *component.
 	 */
+	@Activate
 	protected void activate(ComponentContext componentContext) {
 		Dictionary<?, ?> props = componentContext.getProperties();
 	}
