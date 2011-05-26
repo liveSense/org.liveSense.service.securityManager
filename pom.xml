@@ -53,7 +53,7 @@
 				<configuration>
 					<instructions>
 						<Export-Package>
-							org.liveSense.service.securityManager.*;version=${pom.version}
+							org.liveSense.service.securityManager.*;version=${project.version}
 						</Export-Package>
 						<Include-Resource>
 							{maven-resources}
