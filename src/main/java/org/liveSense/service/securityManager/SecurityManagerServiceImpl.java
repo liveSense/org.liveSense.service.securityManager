@@ -65,7 +65,6 @@ import org.liveSense.service.securityManager.exceptions.PrincipalIsNotGroupExcep
 import org.liveSense.service.securityManager.exceptions.PrincipalIsNotUserException;
 import org.liveSense.service.securityManager.exceptions.UserAlreadyExistsException;
 import org.liveSense.service.securityManager.exceptions.UserNotExistsException;
-import org.liveSense.core.AdministrativeService;
 import org.liveSense.core.Configurator;
 import org.liveSense.core.wrapper.GenericValue;
 import org.liveSense.core.PasswordDigester;
@@ -77,7 +76,7 @@ import org.slf4j.LoggerFactory;
 	description="%service.description",
 	immediate=true)
 @Service(value=SecurityManagerService.class)
-public class SecurityManagerServiceImpl extends AdministrativeService implements SecurityManagerService {
+public class SecurityManagerServiceImpl implements SecurityManagerService {
 
 	/**
 	 * default log
