@@ -893,44 +893,61 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			}
 
 			AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
-			AccessControlList updatedAcl = null;
-			AccessControlPolicyIterator applicablePolicies = accessControlManager.getApplicablePolicies(path);
-			while (applicablePolicies.hasNext()) {
-				AccessControlPolicy policy = applicablePolicies.nextAccessControlPolicy();
+
+			// Get or create the ACL for the node.
+			AccessControlList acl = null;
+			AccessControlPolicy[] policies = accessControlManager.getPolicies(path);
+			for (AccessControlPolicy policy : policies) {
 				if (policy instanceof AccessControlList) {
-
-					updatedAcl = (AccessControlList) policy;
-					AccessControlEntry[] accessControlEntries = updatedAcl.getAccessControlEntries();
-					// Removes all AccesControlList entry
-					for (AccessControlEntry ace : accessControlEntries) {
-						if (authorizable.getPrincipal().getName().equals(ace.getPrincipal().getName())) {
-							updatedAcl.removeAccessControlEntry(ace);
-						}
-					}
-					// Set new ACL
-					if (privileges.getGranted() != null && privileges.getGranted().size()>0) {
-						SerializablePrivilege[] granted = new SerializablePrivilege[privileges.getGranted().size()];
-						System.arraycopy(privileges.getGranted().toArray(), 0, granted, 0, privileges.getGranted().size());
-						if (!AccessControlUtil.addEntry(updatedAcl, authorizable.getPrincipal(), (Privilege[]) PrivilegeFromSerializable.fromSerializableArray(accessControlManager, granted), true)) {
-							throw new RepositoryException("Could not set granted rights for principal: " + authorizable.getPrincipal());
-						}
-					}
-
-					if (privileges.getDenied() != null && privileges.getDenied().size()>0) {
-						SerializablePrivilege[] denied = new SerializablePrivilege[privileges.getDenied().size()];
-						System.arraycopy(privileges.getGranted().toArray(), 0, denied, 0, privileges.getDenied().size());
-						if (!AccessControlUtil.addEntry(updatedAcl, authorizable.getPrincipal(), (Privilege[]) PrivilegeFromSerializable.fromSerializableArray(accessControlManager, denied), true)) {
-							throw new RepositoryException("Could not set granted denied for principal: " + authorizable.getPrincipal());
-						}
-					}
+					acl = (AccessControlList) policy;
 					break;
 				}
 			}
-			if (updatedAcl == null) {
-				throw new RepositoryException("Unable find access control policy list");
+			
+			if (acl == null) {
+				AccessControlPolicyIterator applicablePolicies = accessControlManager.getApplicablePolicies(path);
+				while (applicablePolicies.hasNext()) {
+					AccessControlPolicy policy = applicablePolicies.nextAccessControlPolicy();
+					if (policy instanceof AccessControlList) {
+						acl = (AccessControlList) policy;
+						break;
+					}
+				}
+			}
+			
+			if (acl == null) {
+				throw new RepositoryException("Could not obtain ACL for resource " + path);
+			}
+			
+			// Combine all existing ACEs for the target principal.
+			AccessControlEntry[] accessControlEntries = acl.getAccessControlEntries();
+			for (int i=0; i < accessControlEntries.length; i++) {
+	    		AccessControlEntry ace = accessControlEntries[i];
+	    		if (principal.equals(ace.getPrincipal())) {
+	    			// First remove old ACE for user
+	    			acl.removeAccessControlEntry(ace);
+	    		}
+				break;
 			}
 
-			accessControlManager.setPolicy(path, updatedAcl);
+			// Set new ACL
+			if (privileges.getGranted() != null && privileges.getGranted().size()>0) {
+				SerializablePrivilege[] granted = new SerializablePrivilege[privileges.getGranted().size()];
+				System.arraycopy(privileges.getGranted().toArray(), 0, granted, 0, privileges.getGranted().size());
+				if (!AccessControlUtil.addEntry(acl, authorizable.getPrincipal(), (Privilege[]) PrivilegeFromSerializable.fromSerializableArray(accessControlManager, granted), true)) {
+					throw new RepositoryException("Could not set granted rights for principal: " + authorizable.getPrincipal());
+				}
+			}
+
+			if (privileges.getDenied() != null && privileges.getDenied().size()>0) {
+				SerializablePrivilege[] denied = new SerializablePrivilege[privileges.getDenied().size()];
+				System.arraycopy(privileges.getGranted().toArray(), 0, denied, 0, privileges.getDenied().size());
+				if (!AccessControlUtil.addEntry(acl, authorizable.getPrincipal(), (Privilege[]) PrivilegeFromSerializable.fromSerializableArray(accessControlManager, denied), true)) {
+					throw new RepositoryException("Could not set granted denied for principal: " + authorizable.getPrincipal());
+				}
+			}
+			accessControlManager.setPolicy(path, acl);
+
 		} catch (RepositoryException ex) {
 			throw new InternalException("Repository exception", ex);
 		} finally {
