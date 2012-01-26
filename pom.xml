@@ -72,6 +72,10 @@
 			<artifactId>jackrabbit-api</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-core</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.liveSense</groupId>
 			<artifactId>org.liveSense.core</artifactId>
 		</dependency>

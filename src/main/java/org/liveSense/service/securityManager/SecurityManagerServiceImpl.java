@@ -56,6 +56,7 @@ import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
+import org.apache.jackrabbit.core.security.principal.EveryonePrincipal;
 import org.apache.sling.jcr.api.SlingRepository;
 import org.apache.sling.jcr.base.util.AccessControlUtil;
 import org.liveSense.service.securityManager.exceptions.GroupAlreadyExistsException;
@@ -253,7 +254,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			if (authorizable == null) {
 				throw new GroupNotExistsException("Group does not exists: " + groupName);
 			}
-			if (authorizable.isGroup()) {
+			if (!authorizable.isGroup()) {
 				throw new PrincipalIsNotGroupException("Principal is not group: " + groupName);
 			} else {
 				return (Group) authorizable;
@@ -884,12 +885,18 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
-	public void setAclByName(Session session, String principal, String path, AccessRights privileges) throws InternalException, PrincipalNotExistsException {
+	public void setAclByName(Session session, String principalName, String path, AccessRights privileges) throws InternalException, PrincipalNotExistsException {
 		try {
 			UserManager userManager = AccessControlUtil.getUserManager(session);
-			Authorizable authorizable = userManager.getAuthorizable(principal);
-			if (authorizable == null) {
-				throw new PrincipalNotExistsException("Principal does not exists: " + principal);
+			//Authorizable authorizable = null;
+			Principal principal = null;
+			if (!principalName.equalsIgnoreCase("everyone")) {
+				principal = userManager.getAuthorizable(principalName).getPrincipal();
+				if (principal == null) {
+					throw new PrincipalNotExistsException("Principal does not exists: " + principalName);
+				}
+			} else {
+				principal = EveryonePrincipal.getInstance();
 			}
 
 			AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
@@ -929,21 +936,21 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	    		}
 				break;
 			}
-
+			
 			// Set new ACL
 			if (privileges.getGranted() != null && privileges.getGranted().size()>0) {
 				SerializablePrivilege[] granted = new SerializablePrivilege[privileges.getGranted().size()];
 				System.arraycopy(privileges.getGranted().toArray(), 0, granted, 0, privileges.getGranted().size());
-				if (!AccessControlUtil.addEntry(acl, authorizable.getPrincipal(), (Privilege[]) PrivilegeFromSerializable.fromSerializableArray(accessControlManager, granted), true)) {
-					throw new RepositoryException("Could not set granted rights for principal: " + authorizable.getPrincipal());
+				if (!AccessControlUtil.addEntry(acl, principal, (Privilege[]) PrivilegeFromSerializable.fromSerializableArray(accessControlManager, granted), true)) {
+					throw new RepositoryException("Could not set granted rights for principal: " + principal);
 				}
 			}
 
 			if (privileges.getDenied() != null && privileges.getDenied().size()>0) {
 				SerializablePrivilege[] denied = new SerializablePrivilege[privileges.getDenied().size()];
-				System.arraycopy(privileges.getGranted().toArray(), 0, denied, 0, privileges.getDenied().size());
-				if (!AccessControlUtil.addEntry(acl, authorizable.getPrincipal(), (Privilege[]) PrivilegeFromSerializable.fromSerializableArray(accessControlManager, denied), true)) {
-					throw new RepositoryException("Could not set granted denied for principal: " + authorizable.getPrincipal());
+				System.arraycopy(privileges.getDenied().toArray(), 0, denied, 0, privileges.getDenied().size());
+				if (!AccessControlUtil.addEntry(acl, principal, (Privilege[]) PrivilegeFromSerializable.fromSerializableArray(accessControlManager, denied), false)) {
+					throw new RepositoryException("Could not set granted denied for principal: " + principal);
 				}
 			}
 			accessControlManager.setPolicy(path, acl);
