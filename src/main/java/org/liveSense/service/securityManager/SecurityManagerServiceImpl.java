@@ -174,12 +174,14 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 				}
 			});
 
-			for (Object key : properties.keySet()) {
-				GenericValue val = GenericValue.getGenericValueFromObject(properties.get(key));
-				if (val.isMultiValue()) {
-					group.setProperty((String) key, val.getValues());
-				} else {
-					group.setProperty((String) key, val.get());
+			if (properties != null) {
+				for (Object key : properties.keySet()) {
+					GenericValue val = GenericValue.getGenericValueFromObject(properties.get(key));
+					if (val.isMultiValue()) {
+						group.setProperty((String) key, val.getValues());
+					} else {
+						group.setProperty((String) key, val.get());
+					}
 				}
 			}
 
