@@ -33,7 +33,7 @@
 	<artifactId>org.liveSense.service.securityManager</artifactId>
 	<packaging>bundle</packaging>
 	<version>1.0.1-SNAPSHOT</version>
-	<name>liveSense Security Manager service</name>
+	<name>liveSense :: Service :: Security Manager</name>
 	<description>
 		liveSense security manager service,
 	</description>
