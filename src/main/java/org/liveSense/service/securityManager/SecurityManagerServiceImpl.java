@@ -21,7 +21,6 @@ package org.liveSense.service.securityManager;
  * @author Robert Csakany (robson@semmi.se)
  * @created Feb 12, 2010
  */
-import org.liveSense.service.securityManager.exceptions.PrincipalNotExistsException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -34,8 +33,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.jcr.Node;
 
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.UnsupportedRepositoryOperationException;
@@ -51,7 +50,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.principal.PrincipalManager;
-
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.jackrabbit.api.security.user.User;
@@ -59,16 +57,17 @@ import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.core.security.principal.EveryonePrincipal;
 import org.apache.sling.jcr.api.SlingRepository;
 import org.apache.sling.jcr.base.util.AccessControlUtil;
+import org.liveSense.core.Configurator;
+import org.liveSense.core.PasswordDigester;
+import org.liveSense.core.wrapper.GenericValue;
 import org.liveSense.service.securityManager.exceptions.GroupAlreadyExistsException;
 import org.liveSense.service.securityManager.exceptions.GroupNotExistsException;
 import org.liveSense.service.securityManager.exceptions.InternalException;
 import org.liveSense.service.securityManager.exceptions.PrincipalIsNotGroupException;
 import org.liveSense.service.securityManager.exceptions.PrincipalIsNotUserException;
+import org.liveSense.service.securityManager.exceptions.PrincipalNotExistsException;
 import org.liveSense.service.securityManager.exceptions.UserAlreadyExistsException;
 import org.liveSense.service.securityManager.exceptions.UserNotExistsException;
-import org.liveSense.core.Configurator;
-import org.liveSense.core.wrapper.GenericValue;
-import org.liveSense.core.PasswordDigester;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,6 +99,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 
 	
 	/** Returns the JCR repository used by this service. */
+	@Override
 	public SlingRepository getRepository() throws RepositoryException {
 		if (repository == null) throw new RepositoryException("Repository is null");
 		return repository;
@@ -117,6 +117,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public User addUser(Session session, String userName, String password, Map<String, Object> properties) throws UserAlreadyExistsException, InternalException {
 		User user = null;
 		try {
@@ -130,14 +131,17 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			}
 			String passwordDigest = new PasswordDigester(password, configurator.getDigest(), configurator.getEncoding()).toString();
 			user = userManager.createUser(userName, passwordDigest);
-			user.setProperty("jcr:Password", GenericValue.getGenericValueFromObject(passwordDigest).get());
+			//user.setProperty("jcr:Password", GenericValue.getGenericValueFromObject(passwordDigest).get());
 
 			for (Object key : properties.keySet()) {
-				GenericValue val = GenericValue.getGenericValueFromObject(properties.get(key));
-				if (val.isMultiValue()) {
-					user.setProperty((String) key, val.getValues());
-				} else {
-					user.setProperty((String) key, val.get());
+				if (properties.get(key) != null) {
+					GenericValue val = GenericValue.getGenericValueFromObject(properties.get(key));
+					if (val.isMultiValue()) {
+						// 
+						user.setProperty((String) key, val.getValues());
+					} else {
+						user.setProperty((String) key, val.get());
+					}
 				}
 			}
 		} catch (RepositoryException ex) {
@@ -154,6 +158,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public Group addGroup(Session session, final String groupName, Map<String, Object> properties) throws GroupAlreadyExistsException, InternalException {
 		Group group = null;
 		try {
@@ -169,6 +174,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			}
 			group = userManager.createGroup(new Principal() {
 
+				@Override
 				public String getName() {
 					return groupName;
 				}
@@ -176,11 +182,13 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 
 			if (properties != null) {
 				for (Object key : properties.keySet()) {
-					GenericValue val = GenericValue.getGenericValueFromObject(properties.get(key));
-					if (val.isMultiValue()) {
-						group.setProperty((String) key, val.getValues());
-					} else {
-						group.setProperty((String) key, val.get());
+					if (properties.get(key) != null) {
+						GenericValue val = GenericValue.getGenericValueFromObject(properties.get(key));
+						if (val.isMultiValue()) {
+							group.setProperty((String) key, val.getValues());
+						} else {
+							group.setProperty((String) key, val.get());
+						}
 					}
 				}
 			}
@@ -195,6 +203,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public void deleteGroupByName(Session session, String groupName) throws GroupNotExistsException,
 			InternalException, PrincipalIsNotGroupException {
 		Group group = null;
@@ -220,6 +229,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public void deleteUserByName(Session session, String userName) throws UserNotExistsException,
 			InternalException, PrincipalIsNotUserException {
 		Group group = null;
@@ -245,6 +255,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public Group getGroupByName(Session session, String groupName) throws GroupNotExistsException,
 			InternalException, PrincipalIsNotGroupException {
 		Map ret = new HashMap();
@@ -268,6 +279,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public User getUserByName(Session session, String userName) throws UserNotExistsException,
 			InternalException, PrincipalIsNotUserException {
 		Map ret = new HashMap();
@@ -291,6 +303,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public Authorizable getAuthorizableByName(Session session, String principal) throws PrincipalNotExistsException,
 			InternalException {
 		Map ret = new HashMap();
@@ -310,6 +323,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public void changePasswordByName(Session session, String userName, String password) throws UserNotExistsException, PrincipalIsNotUserException, InternalException {
 		try {
 			UserManager userManager = AccessControlUtil.getUserManager(session);
@@ -335,6 +349,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public List<Group> getEffectiveMemberOfByName(Session session, String principal) throws PrincipalNotExistsException, InternalException {
 		ArrayList<Group> ret = new ArrayList<Group>();
 
@@ -363,6 +378,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public List<Group> getDeclaredMemberOfByName(Session session, String principal) throws PrincipalNotExistsException, InternalException {
 		ArrayList<Group> ret = new ArrayList<Group>();
 
@@ -391,6 +407,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public List<Authorizable> getEffectiveMembersByName(Session session, String groupName) throws InternalException, PrincipalIsNotGroupException, GroupNotExistsException {
 		List<Authorizable> ret = new ArrayList<Authorizable>();
 
@@ -421,6 +438,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public List<Authorizable> getDeclaredMembersByName(Session session, String groupName) throws InternalException, PrincipalIsNotGroupException, GroupNotExistsException {
 		List<Authorizable> ret = new ArrayList<Authorizable>();
 
@@ -450,6 +468,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public Map<String, GenericValue> getPrincipalPropertiesByName(Session session, String principal) throws PrincipalNotExistsException, InternalException {
 		Map<String, GenericValue> ret = new HashMap<String, GenericValue>();
 
@@ -474,6 +493,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public void modifyPrincipalPropertiesByName(Session session, String principal, Map<String, GenericValue> properties)
 			throws UserNotExistsException, InternalException,
 			PrincipalIsNotUserException {
@@ -481,6 +501,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public SerializablePrivilege[] getSupportedPrivileges(Node node) throws InternalException {
 		try {
 			return getSupportedPrivileges(node.getSession(), node.getPath());
@@ -490,6 +511,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public SerializablePrivilege[] getSupportedPrivileges(Session session, String absPath) throws InternalException {
 		try {
 			AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
@@ -504,6 +526,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 
 
 	/** {@inheritDoc} */
+	@Override
 	public Map<Principal, AccessRights> getDeclaredAccessRights(Node node) throws InternalException {
 		Map<Principal, AccessRights> accessRights;
 		try {
@@ -515,6 +538,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public Map<Principal, AccessRights> getDeclaredAccessRights(Session session, String absPath) throws InternalException {
 		try {
 			Map<Principal, AccessRights> accessMap = new LinkedHashMap<Principal, AccessRights>();
@@ -560,6 +584,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public AccessRights getDeclaredAccessRightsForPrincipal(Node node, String principalId) throws InternalException {
 		try {
 			return getDeclaredAccessRightsForPrincipal(node.getSession(), node.getPath(), principalId);
@@ -569,6 +594,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public AccessRights getDeclaredAccessRightsForPrincipal(Session session, String absPath, String principalId) throws InternalException {
 		try {
 			AccessRights rights = new AccessRightsImpl();
@@ -609,6 +635,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public Map<Principal, AccessRights> getEffectiveAccessRights(Node node) throws InternalException {
 		Map<Principal, AccessRights> accessRights;
 		try {
@@ -620,6 +647,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public Map<Principal, AccessRights> getEffectiveAccessRights(Session session, String absPath) throws InternalException {
 		try {
 			Map<Principal, AccessRights> accessMap = new LinkedHashMap<Principal, AccessRights>();
@@ -665,6 +693,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public AccessRights getEffectiveAccessRightsForPrincipal(Node node, String principalId) throws InternalException {
 		try {
 			return getEffectiveAccessRightsForPrincipal(node.getSession(), node.getPath(), principalId);
@@ -674,6 +703,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public AccessRights getEffectiveAccessRightsForPrincipal(Session session, String absPath, String principalId) throws InternalException {
 		AccessRights rights = new AccessRightsImpl();
 		if (principalId != null && principalId.length() > 0) {
@@ -712,6 +742,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canAddChildren(Node node) {
 		try {
 			return canAddChildren(node.getSession(), node.getPath());
@@ -721,6 +752,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canAddChildren(Session session, String absPath) {
 		try {
 			AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
@@ -733,6 +765,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canDeleteChildren(Node node) {
 		try {
 			return canDeleteChildren(node.getSession(), node.getPath());
@@ -742,6 +775,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canDeleteChildren(Session session, String absPath) {
 		try {
 			AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
@@ -755,6 +789,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canDelete(Node node) {
 		try {
 			return canDelete(node.getSession(), node.getPath());
@@ -764,6 +799,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canDelete(Session session, String absPath) {
 		try {
 			AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
@@ -779,6 +815,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canModifyProperties(Node node) {
 		try {
 			return canModifyProperties(node.getSession(), node.getPath());
@@ -788,6 +825,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canModifyProperties(Session session, String absPath) {
 		try {
 			AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
@@ -800,6 +838,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canReadAccessControl(Node node) {
 		try {
 			return canReadAccessControl(node.getSession(), node.getPath());
@@ -809,6 +848,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canReadAccessControl(Session session, String absPath) {
 		try {
 			AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
@@ -821,6 +861,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canModifyAccessControl(Node node) {
 		try {
 			return canModifyAccessControl(node.getSession(), node.getPath());
@@ -830,6 +871,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canModifyAccessControl(Session session, String absPath) {
 		try {
 			AccessControlManager accessControlManager = AccessControlUtil.getAccessControlManager(session);
@@ -842,6 +884,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canUpdateAuthorizable(Session session, String principalID) {
 		try {
 			PrincipalManager principalManager = AccessControlUtil.getPrincipalManager(session);
@@ -869,6 +912,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean canDeleteAuthorizable(Session session, String principalID) {
 		try {
 			PrincipalManager principalManager = AccessControlUtil.getPrincipalManager(session);
@@ -887,6 +931,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public void setAclByName(Session session, String principalName, String path, AccessRights privileges) throws InternalException, PrincipalNotExistsException {
 		try {
 			UserManager userManager = AccessControlUtil.getUserManager(session);
@@ -943,7 +988,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			if (privileges.getGranted() != null && privileges.getGranted().size()>0) {
 				SerializablePrivilege[] granted = new SerializablePrivilege[privileges.getGranted().size()];
 				System.arraycopy(privileges.getGranted().toArray(), 0, granted, 0, privileges.getGranted().size());
-				if (!AccessControlUtil.addEntry(acl, principal, (Privilege[]) PrivilegeFromSerializable.fromSerializableArray(accessControlManager, granted), true)) {
+				if (!AccessControlUtil.addEntry(acl, principal, PrivilegeFromSerializable.fromSerializableArray(accessControlManager, granted), true)) {
 					throw new RepositoryException("Could not set granted rights for principal: " + principal);
 				}
 			}
@@ -951,7 +996,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			if (privileges.getDenied() != null && privileges.getDenied().size()>0) {
 				SerializablePrivilege[] denied = new SerializablePrivilege[privileges.getDenied().size()];
 				System.arraycopy(privileges.getDenied().toArray(), 0, denied, 0, privileges.getDenied().size());
-				if (!AccessControlUtil.addEntry(acl, principal, (Privilege[]) PrivilegeFromSerializable.fromSerializableArray(accessControlManager, denied), false)) {
+				if (!AccessControlUtil.addEntry(acl, principal, PrivilegeFromSerializable.fromSerializableArray(accessControlManager, denied), false)) {
 					throw new RepositoryException("Could not set granted denied for principal: " + principal);
 				}
 			}
@@ -965,6 +1010,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public AccessRights getAclByName(Session session, String principalId, String absPath) throws InternalException {
 		AccessRights rights = new AccessRightsImpl();
 
