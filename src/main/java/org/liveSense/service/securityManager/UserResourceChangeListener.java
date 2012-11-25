@@ -33,8 +33,6 @@ import javax.jcr.observation.EventIterator;
 import javax.jcr.observation.EventListener;
 import javax.jcr.observation.ObservationManager;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.event.jobs.JobUtil;
@@ -48,12 +46,12 @@ import org.slf4j.LoggerFactory;
  * Observe the users  for changes, and create a
  * user generation job when user are added/deleted.
  */
-@Component(
+/*@Component(
 		label = "%userResourceChangeListener.name", 
 		description = "%userResourceChangeListener.description", 
 		immediate = true, 
 		metatype = false
-)
+)*/
 public class UserResourceChangeListener {
 	private static final Logger log = LoggerFactory.getLogger(UserResourceChangeListener.class);
 
@@ -89,6 +87,7 @@ public class UserResourceChangeListener {
 			eventAdmin.sendEvent(removeUserJob);
 		}
 
+		@Override
 		public void onEvent(EventIterator it) {
 			while (it.hasNext()) {
 				Event event = it.nextEvent();
@@ -133,7 +132,7 @@ public class UserResourceChangeListener {
 		}
 	}
 
-	private ArrayList<PathEventListener> eventListeners = new ArrayList<PathEventListener>();
+	private final ArrayList<PathEventListener> eventListeners = new ArrayList<PathEventListener>();
 
 	private ObservationManager observationManager;
 
