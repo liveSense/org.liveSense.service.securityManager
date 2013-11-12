@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?><features name="liveSense-${liveSense.version}-service-securityManager" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
+	<feature name="liveSense-service-securityManager" version="${liveSense.service.securityManager.version}" description="liveSense service securityManager">
+		<feature>liveSense-core-base</feature>
+        <bundle>mvn:com.github.livesense/org.liveSense.service.securityManager/${liveSense.service.securityManager.version}</bundle>
+	</feature>
+</features>
