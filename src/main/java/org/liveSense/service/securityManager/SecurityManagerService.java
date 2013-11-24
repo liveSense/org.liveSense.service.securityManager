@@ -20,14 +20,16 @@ package org.liveSense.service.securityManager;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.security.Privilege;
+
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.jcr.api.SlingRepository;
+import org.liveSense.core.wrapper.GenericValue;
 import org.liveSense.service.securityManager.exceptions.GroupAlreadyExistsException;
 import org.liveSense.service.securityManager.exceptions.GroupNotExistsException;
 import org.liveSense.service.securityManager.exceptions.InternalException;
@@ -36,7 +38,6 @@ import org.liveSense.service.securityManager.exceptions.PrincipalIsNotUserExcept
 import org.liveSense.service.securityManager.exceptions.PrincipalNotExistsException;
 import org.liveSense.service.securityManager.exceptions.UserAlreadyExistsException;
 import org.liveSense.service.securityManager.exceptions.UserNotExistsException;
-import org.liveSense.core.wrapper.GenericValue;
 
 /**
  *
@@ -478,5 +479,31 @@ public interface SecurityManagerService {
 	 * @throws PrincipalNotExistsException
 	 */
 	void setAclByName(Session session, String principal, String path, AccessRights privileges) throws InternalException, PrincipalNotExistsException;
+
+	/**
+	 * Add principal to group
+	 *
+	 * @param The JCR session of the current user
+	 * @param Principal
+	 * @param Group
+	 * @return 
+	 * @throws InternalException
+	 * @throws PrincipalNotExistsException
+	 * @throws PrincipalIsNotGroupException 
+	 */	
+	boolean addPrincipalToGroup(Session session, String principal, String group) throws InternalException, PrincipalNotExistsException, PrincipalIsNotGroupException;
+
+
+	/**
+	 * Add principal to group
+	 *
+	 * @param The JCR session of the current user
+	 * @param Principal
+	 * @param Group
+	 * @throws InternalException
+	 * @throws PrincipalNotExistsException
+	 * @throws PrincipalIsNotGroupException 
+	 */	
+	boolean removePrincipalFromGroup(Session session, String principal, String group) throws InternalException, PrincipalNotExistsException, PrincipalIsNotGroupException;
 
 }

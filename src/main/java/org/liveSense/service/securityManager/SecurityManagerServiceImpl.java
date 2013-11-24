@@ -27,12 +27,13 @@ import java.lang.reflect.Method;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -45,7 +46,6 @@ import javax.jcr.security.AccessControlPolicy;
 import javax.jcr.security.AccessControlPolicyIterator;
 import javax.jcr.security.Privilege;
 
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -70,7 +70,6 @@ import org.liveSense.service.securityManager.exceptions.PrincipalIsNotUserExcept
 import org.liveSense.service.securityManager.exceptions.PrincipalNotExistsException;
 import org.liveSense.service.securityManager.exceptions.UserAlreadyExistsException;
 import org.liveSense.service.securityManager.exceptions.UserNotExistsException;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,18 +105,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 		if (repository == null) throw new RepositoryException("Repository is null");
 		return repository;
 	}
-
-	/**
-	 * Activates this component.
-	 *
-	 * @param componentContext The OSGi <code>ComponentContext</code> of this
-	 *component.
-	 */
-	@Activate
-	protected void activate(ComponentContext componentContext) {
-		Dictionary<?, ?> props = componentContext.getProperties();
-	}
-
+	
 	/** {@inheritDoc} */
 	@Override
 	public User addUser(Session session, String userName, String password, Map<String, Object> properties) throws UserAlreadyExistsException, InternalException {
@@ -133,7 +121,6 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			}
 			String passwordDigest = new PasswordDigester(password, configurator.getDigest(), configurator.getEncoding()).toString();
 			user = userManager.createUser(userName, passwordDigest);
-			//user.setProperty("jcr:Password", GenericValue.getGenericValueFromObject(passwordDigest).get());
 
 			for (Object key : properties.keySet()) {
 				if (properties.get(key) != null) {
@@ -174,6 +161,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 						"A principal already exists with the requested name: "
 						+ groupName);
 			}
+		
 			group = userManager.createGroup(new Principal() {
 
 				@Override
@@ -208,7 +196,6 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	@Override
 	public void deleteGroupByName(Session session, String groupName) throws GroupNotExistsException,
 			InternalException, PrincipalIsNotGroupException {
-		Group group = null;
 		try {
 			UserManager userManager = AccessControlUtil.getUserManager(session);
 			Authorizable authorizable = userManager.getAuthorizable(groupName);
@@ -216,7 +203,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			if (authorizable == null) {
 				// Principal already exists!
 				throw new GroupNotExistsException(
-						"Group does not exists with the requested name: "
+						"Group does not exist with the requested name: "
 						+ groupName);
 			}
 			if (!authorizable.isGroup()) {
@@ -234,7 +221,6 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	@Override
 	public void deleteUserByName(Session session, String userName) throws UserNotExistsException,
 			InternalException, PrincipalIsNotUserException {
-		Group group = null;
 		try {
 			UserManager userManager = AccessControlUtil.getUserManager(session);
 			Authorizable authorizable = userManager.getAuthorizable(userName);
@@ -242,7 +228,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			if (authorizable == null) {
 				// Principal already exists!
 				throw new UserNotExistsException(
-						"User does not exists with the requested name: "
+						"User does not exist with the requested name: "
 						+ userName);
 			}
 			if (authorizable.isGroup()) {
@@ -260,14 +246,13 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	@Override
 	public Group getGroupByName(Session session, String groupName) throws GroupNotExistsException,
 			InternalException, PrincipalIsNotGroupException {
-		Map ret = new HashMap();
 
 		try {
 			UserManager userManager = AccessControlUtil.getUserManager(session);
 			Authorizable authorizable = userManager.getAuthorizable(groupName);
 
 			if (authorizable == null) {
-				throw new GroupNotExistsException("Group does not exists: " + groupName);
+				throw new GroupNotExistsException("Group does not exist: " + groupName);
 			}
 			if (!authorizable.isGroup()) {
 				throw new PrincipalIsNotGroupException("Principal is not group: " + groupName);
@@ -284,14 +269,13 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	@Override
 	public User getUserByName(Session session, String userName) throws UserNotExistsException,
 			InternalException, PrincipalIsNotUserException {
-		Map ret = new HashMap();
 
 		try {
 			UserManager userManager = AccessControlUtil.getUserManager(session);
 			Authorizable authorizable = userManager.getAuthorizable(userName);
 
 			if (authorizable == null) {
-				throw new UserNotExistsException("Group does not exists: " + userName);
+				throw new UserNotExistsException("Group does not exist: " + userName);
 			}
 			if (authorizable.isGroup()) {
 				throw new PrincipalIsNotUserException("Principal is not user: " + userName);
@@ -308,14 +292,13 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	@Override
 	public Authorizable getAuthorizableByName(Session session, String principal) throws PrincipalNotExistsException,
 			InternalException {
-		Map ret = new HashMap();
 
 		try {
 			UserManager userManager = AccessControlUtil.getUserManager(session);
 			Authorizable authorizable = userManager.getAuthorizable(principal);
 
 			if (authorizable == null) {
-				throw new PrincipalNotExistsException("Principal does not exists: " + principal);
+				throw new PrincipalNotExistsException("Principal does not exist: " + principal);
 			}
 			return authorizable;
 		} catch (RepositoryException ex) {
@@ -333,7 +316,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 
 			if (authorizable == null) {
 				throw new UserNotExistsException(
-						"User does not exists: "
+						"User does not exist: "
 						+ userName);
 			}
 			if (authorizable.isGroup()) {
@@ -362,7 +345,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			if (authorizable == null) {
 				// user already exists!
 				throw new PrincipalNotExistsException(
-						"Principal does not exists: "
+						"Principal does not exist: "
 						+ principal);
 			}
 
@@ -391,7 +374,7 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			if (authorizable == null) {
 				// user already exists!
 				throw new PrincipalNotExistsException(
-						"Principal does not exists: "
+						"Principal does not exist: "
 						+ principal);
 			}
 
@@ -411,8 +394,8 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	/** {@inheritDoc} */
 	@Override
 	public List<Authorizable> getEffectiveMembersByName(Session session, String groupName) throws InternalException, PrincipalIsNotGroupException, GroupNotExistsException {
-		List<Authorizable> ret = new ArrayList<Authorizable>();
-
+		Set<Authorizable> ret = new HashSet<Authorizable>();
+		
 		try {
 			UserManager userManager = AccessControlUtil.getUserManager(session);
 			Authorizable authorizable = userManager.getAuthorizable(groupName);
@@ -420,23 +403,27 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			if (authorizable == null) {
 				// user already exists!
 				throw new GroupNotExistsException(
-						"Group does not exists: "
+						"Group does not exist: "
 						+ groupName);
 			}
 			if (!authorizable.isGroup()) {
 				throw new PrincipalIsNotGroupException("Principal is not a group: " + groupName);
 			}
 
-			Iterator iter = ((Group) authorizable).getMembers();
+			Iterator<Authorizable> iter = ((Group) authorizable).getMembers();
 			while (iter.hasNext()) {
-				ret.add(authorizable);
+				Group act = (Group)iter.next();
+				ret.addAll(getEffectiveMembersByName(session, act.getID()));
+				ret.add(act);
 			}
 
 		} catch (RepositoryException e) {
 						throw new InternalException("Repository exception", e);
 		} finally {
 		}
-		return ret;
+		List<Authorizable> out = new ArrayList<Authorizable>();
+		out.addAll(ret);
+		return out;
 	}
 
 	/** {@inheritDoc} */
@@ -450,14 +437,14 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 
 			if (authorizable == null) {
 				throw new GroupNotExistsException(
-						"Group does not exists: "
+						"Group does not exist: "
 						+ groupName);
 			}
 			if (!authorizable.isGroup()) {
 				throw new PrincipalIsNotGroupException("Principal is not a group: " + groupName);
 			}
 
-			Iterator iter = ((Group) authorizable).getDeclaredMembers();
+			Iterator<Authorizable> iter = ((Group) authorizable).getDeclaredMembers();
 			while (iter.hasNext()) {
 				ret.add(authorizable);
 			}
@@ -479,11 +466,11 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			Authorizable authorizable = userManager.getAuthorizable(principal);
 
 			if (authorizable == null) {
-				throw new PrincipalNotExistsException("Principal does not exists: " + principal);
+				throw new PrincipalNotExistsException("Principal does not exist: " + principal);
 			}
-			Iterator iter = authorizable.getPropertyNames();
+			Iterator<String> iter = authorizable.getPropertyNames();
 			while (iter.hasNext()) {
-				String key = (String) iter.next();
+				String key = iter.next();
 				GenericValue value = GenericValue.getGenericValueFromObject(authorizable.getProperty(key));
 				ret.put(key, value);
 			}
@@ -922,7 +909,6 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			if (principal == null) {
 				return false;
 			}
-
 			//should check if principal implements ItemBasedPrincipal, but it is not visible here so use reflection instead
 			String path = getAuthorizableItemPath(principal);
 			return canDelete(session, path);
@@ -937,12 +923,11 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 	public void setAclByName(Session session, String principalName, String path, AccessRights privileges) throws InternalException, PrincipalNotExistsException {
 		try {
 			UserManager userManager = AccessControlUtil.getUserManager(session);
-			//Authorizable authorizable = null;
 			Principal principal = null;
 			if (!principalName.equalsIgnoreCase("everyone")) {
 				principal = userManager.getAuthorizable(principalName).getPrincipal();
 				if (principal == null) {
-					throw new PrincipalNotExistsException("Principal does not exists: " + principalName);
+					throw new PrincipalNotExistsException("Principal does not exist: " + principalName);
 				}
 			} else {
 				principal = EveryonePrincipal.getInstance();
@@ -1050,6 +1035,63 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 		}
 
 		return rights;
+	}
+
+	@Override
+	public boolean addPrincipalToGroup(Session session, String principal,
+			String groupName) throws InternalException, PrincipalNotExistsException, PrincipalIsNotGroupException {
+
+		try {
+			UserManager userManager = AccessControlUtil.getUserManager(session);
+			Authorizable authorizable = userManager.getAuthorizable(principal);
+
+			if (authorizable == null) {
+				throw new PrincipalNotExistsException(
+						"A principal does not exist with the requested name: "
+						+ principal);
+			}
+			Authorizable group = userManager.getAuthorizable(groupName);
+			if (!group.isGroup()) {
+				throw new PrincipalIsNotGroupException("Principal is not group: " + groupName);
+			}
+			
+			Group grp = (Group)group;
+			return grp.addMember(authorizable);
+		} catch (RepositoryException ex) {
+			throw new InternalException("Repository exception", ex);
+		} catch (IllegalArgumentException ex) {
+			throw new InternalException(ex);
+		} finally {
+		}		
+	}
+
+	@Override
+	public boolean removePrincipalFromGroup(Session session, String principal,
+			String groupName) throws InternalException, PrincipalNotExistsException, PrincipalIsNotGroupException {
+
+		try {
+			UserManager userManager = AccessControlUtil.getUserManager(session);
+			Authorizable authorizable = userManager.getAuthorizable(principal);
+
+			if (authorizable == null) {
+				throw new PrincipalNotExistsException(
+						"A principal does not exist with the requested name: "
+						+ principal);
+			}
+			Authorizable group = userManager.getAuthorizable(groupName);
+			if (!group.isGroup()) {
+				throw new PrincipalIsNotGroupException("Principal is not group: " + groupName);
+			}
+			
+			Group grp = (Group)group;
+			return grp.removeMember(authorizable);
+		} catch (RepositoryException ex) {
+			throw new InternalException("Repository exception", ex);
+		} catch (IllegalArgumentException ex) {
+			throw new InternalException(ex);
+		} finally {
+		}
+		
 	}
 }
 
