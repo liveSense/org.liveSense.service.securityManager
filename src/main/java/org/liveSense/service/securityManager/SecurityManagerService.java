@@ -506,4 +506,27 @@ public interface SecurityManagerService {
 	 */	
 	boolean removePrincipalFromGroup(Session session, String principal, String group) throws InternalException, PrincipalNotExistsException, PrincipalIsNotGroupException;
 
+	/**
+	 * Creates user home in JCR root (/)
+	 *
+	 * @param The JCR session of the current user
+	 * @param userName
+	 * @throws InternalException
+	 * @throws PrincipalNotExistsException
+	 * @throws PrincipalIsNotUserException 
+	 */	
+
+	void createUserHome(Session session, String userName) throws PrincipalIsNotUserException, InternalException, PrincipalNotExistsException;
+
+	/**
+	 * Creates user home in JCR on the given path
+	 * @param session
+	 * @param userName
+	 * @param parentPath
+	 * @throws PrincipalIsNotUserException
+	 * @throws InternalException
+	 * @throws PrincipalNotExistsException
+	 */
+	void createUserHome(Session session, String userName, String parentPath) throws PrincipalIsNotUserException, InternalException, PrincipalNotExistsException;
+
 }

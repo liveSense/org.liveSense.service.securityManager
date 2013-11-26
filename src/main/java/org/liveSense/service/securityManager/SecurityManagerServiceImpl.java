@@ -46,6 +46,7 @@ import javax.jcr.security.AccessControlPolicy;
 import javax.jcr.security.AccessControlPolicyIterator;
 import javax.jcr.security.Privilege;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -1085,6 +1086,66 @@ public class SecurityManagerServiceImpl implements SecurityManagerService {
 			
 			Group grp = (Group)group;
 			return grp.removeMember(authorizable);
+		} catch (RepositoryException ex) {
+			throw new InternalException("Repository exception", ex);
+		} catch (IllegalArgumentException ex) {
+			throw new InternalException(ex);
+		} finally {
+		}
+		
+	}
+	
+
+	@Override
+	public void createUserHome(Session session, String userName) throws PrincipalIsNotUserException, InternalException, PrincipalNotExistsException {
+		createUserHome(session, userName, null);
+	}
+
+	@Override
+	public void createUserHome(Session session, String userName, String parentPath) throws PrincipalIsNotUserException, InternalException, PrincipalNotExistsException {
+		try {
+			UserManager userManager = AccessControlUtil.getUserManager(session);
+			Authorizable authorizable = userManager.getAuthorizable(userName);
+			if (authorizable.isGroup()) {
+				throw new PrincipalIsNotUserException("Principal is not user: " + userName);
+			}
+			
+			Node rootNode = session.getRootNode();
+			if (StringUtils.isNotBlank(parentPath)) {
+				rootNode = rootNode.getNode(parentPath);
+			}
+			
+			Node home = null;
+			
+			// If home does not exists, we create it and setting access rights
+			if (!rootNode.hasNode("home")) {
+				// Create home
+				home = rootNode.addNode("home");
+
+				// Access rights (Read/Write disabled)
+				AccessRights rights = new AccessRightsImpl();
+				rights.getDenied().add(new SerializablePrivilege(SerializablePrivilege.JCR_ALL));
+				setAclByName(session, "everyone", home.getPath(), rights);
+			} else {
+				home = rootNode.getNode("home");
+			}
+			
+			// If home/user does not exists, we create it and setting access rights
+			Node userNode = null;
+			if (!home.hasNode(userName)) {
+				userNode = home.addNode(userName);
+
+				// Access rights (Read/Write enabled)
+				AccessRights rights = new AccessRightsImpl();
+				rights.getGranted().add(new SerializablePrivilege(SerializablePrivilege.JCR_ALL));
+				setAclByName(session, userName, userNode.getPath(), rights);
+			} else {
+				userNode = home.getNode(userName);
+			}
+			if (session.hasPendingChanges()) {
+				session.save();
+			}
+			
 		} catch (RepositoryException ex) {
 			throw new InternalException("Repository exception", ex);
 		} catch (IllegalArgumentException ex) {
