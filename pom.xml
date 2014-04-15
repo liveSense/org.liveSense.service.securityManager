@@ -22,9 +22,10 @@
   <parent>
       <groupId>com.github.livesense</groupId>
       <artifactId>org.liveSense.parent</artifactId>
-      <version>2-SNAPSHOT</version>
+      <version>1.0.3</version>
 		<relativePath>..</relativePath>
   </parent>
+  <version>1.0.3-SNAPSHOT</version>
 	<scm>
 		<connection>scm:git:https://github.com/liveSense/org.liveSense.service.securityManager.git</connection>
 		<developerConnection>scm:git:https://github.com/liveSense/org.liveSense.service.securityManager.git</developerConnection>
@@ -33,7 +34,6 @@
 
 	<artifactId>org.liveSense.service.securityManager</artifactId>
 	<packaging>bundle</packaging>
-	<version>1.0.1-SNAPSHOT</version>
 	<name>liveSense :: Service :: Security Manager</name>
 	<description>
 		liveSense security manager service,
