@@ -29,7 +29,7 @@ import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.jcr.api.SlingRepository;
-import org.liveSense.core.wrapper.GenericValue;
+import org.liveSense.misc.jcrWrapper.GenericValue;
 import org.liveSense.service.securityManager.exceptions.GroupAlreadyExistsException;
 import org.liveSense.service.securityManager.exceptions.GroupNotExistsException;
 import org.liveSense.service.securityManager.exceptions.InternalException;

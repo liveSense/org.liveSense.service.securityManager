@@ -21,37 +21,8 @@ package org.liveSense.service.securityManager;
  * @author Robert Csakany (robson@semmi.se)
  * @created Feb 12, 2010
  */
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.security.NoSuchAlgorithmException;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.UnsupportedRepositoryOperationException;
-import javax.jcr.security.AccessControlEntry;
-import javax.jcr.security.AccessControlList;
-import javax.jcr.security.AccessControlManager;
-import javax.jcr.security.AccessControlPolicy;
-import javax.jcr.security.AccessControlPolicyIterator;
-import javax.jcr.security.Privilege;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.jackrabbit.api.security.principal.PrincipalManager;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
@@ -62,17 +33,22 @@ import org.apache.sling.jcr.api.SlingRepository;
 import org.apache.sling.jcr.base.util.AccessControlUtil;
 import org.liveSense.core.Configurator;
 import org.liveSense.core.PasswordDigester;
-import org.liveSense.core.wrapper.GenericValue;
-import org.liveSense.service.securityManager.exceptions.GroupAlreadyExistsException;
-import org.liveSense.service.securityManager.exceptions.GroupNotExistsException;
-import org.liveSense.service.securityManager.exceptions.InternalException;
-import org.liveSense.service.securityManager.exceptions.PrincipalIsNotGroupException;
-import org.liveSense.service.securityManager.exceptions.PrincipalIsNotUserException;
-import org.liveSense.service.securityManager.exceptions.PrincipalNotExistsException;
-import org.liveSense.service.securityManager.exceptions.UserAlreadyExistsException;
-import org.liveSense.service.securityManager.exceptions.UserNotExistsException;
+import org.liveSense.misc.jcrWrapper.GenericValue;
+import org.liveSense.service.securityManager.exceptions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.UnsupportedRepositoryOperationException;
+import javax.jcr.security.*;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
+import java.util.*;
 
 @Component(label="%service.name",
 	description="%service.description",
